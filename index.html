@@ -749,7 +749,14 @@
         console.error("GLTF load error:", err);
         statusEl.classList.remove("hidden");
         statusEl.classList.add("error");
-        statusEl.textContent = "MODEL LOAD FAILED — " + (err?.message || String(err));
+        const msg = err?.message || String(err);
+        const stack = err?.stack ? "\n" + err.stack.split("\n").slice(0, 4).join("\n") : "";
+        statusEl.textContent = "MODEL LOAD FAILED — " + msg + stack;
+        statusEl.style.whiteSpace = "pre-wrap";
+        statusEl.style.fontSize = "9px";
+        statusEl.style.textAlign = "left";
+        statusEl.style.alignItems = "flex-start";
+        statusEl.style.overflow = "auto";
       }
     );
 
