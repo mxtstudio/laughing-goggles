@@ -708,31 +708,38 @@
         scene.add(root);
         modelRoot = root;
 
-        // Find leaf groups + apply hologram materials
+        // Find leaf groups + collect meshes first (don't mutate the graph
+        // while traversing it — adding children mid-traversal causes
+        // infinite recursion / stack overflow)
+        const meshesToStyle = [];
         root.traverse((obj) => {
           if (obj.isObject3D && (obj.name === "Leaf_0" || obj.name === "Leaf_Circle.005_6")) {
             leafGroups.push({ node: obj, baseRotation: obj.rotation.clone() });
           }
           if (obj.isMesh) {
-            const holoMat = new THREE.MeshBasicMaterial({
-              color: 0x5fd0a8,
-              transparent: true,
-              opacity: 0.18,
-              depthWrite: false,
-              side: THREE.DoubleSide,
-            });
-            obj.material = holoMat;
-
-            const wireMat = new THREE.MeshBasicMaterial({
-              color: 0x9ff5d8,
-              wireframe: true,
-              transparent: true,
-              opacity: 0.5,
-              depthWrite: false,
-            });
-            const wireMesh = new THREE.Mesh(obj.geometry, wireMat);
-            obj.add(wireMesh);
+            meshesToStyle.push(obj);
           }
+        });
+
+        meshesToStyle.forEach((obj) => {
+          const holoMat = new THREE.MeshBasicMaterial({
+            color: 0x5fd0a8,
+            transparent: true,
+            opacity: 0.18,
+            depthWrite: false,
+            side: THREE.DoubleSide,
+          });
+          obj.material = holoMat;
+
+          const wireMat = new THREE.MeshBasicMaterial({
+            color: 0x9ff5d8,
+            wireframe: true,
+            transparent: true,
+            opacity: 0.5,
+            depthWrite: false,
+          });
+          const wireMesh = new THREE.Mesh(obj.geometry, wireMat);
+          obj.add(wireMesh);
         });
 
         statusEl.classList.add("hidden");
